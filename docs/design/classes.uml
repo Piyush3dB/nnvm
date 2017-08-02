@@ -1,0 +1,55 @@
+@startuml
+left to right direction
+namespace nnvm {
+    namespace core {
+        class Node {
+        }
+        class NodeEntry {
+        }
+        class NodeAttrs {
+        }
+        Node *-- NodeAttrs
+        Node *-- NodeEntry
+        
+        class Op {
+        }
+        Node o-- Op
+
+        class Symbol {
+        }
+        Symbol *-- NodeEntry
+
+        class Graph {
+        }
+        class IndexedGraph {
+        }
+        Graph ..> IndexedGraph :: <<friend>>
+
+
+
+        class OpMap<ValueType> {
+        }
+        class OpGroup {
+        }
+        OpMap ..> Op :: <<friend>>
+        OpGroup ..> Op :: <<friend>>
+
+
+
+
+    }
+    namespace pass {
+    }
+    namespace c_api {
+    }
+}
+
+namespace dmlc {
+    class any {
+    }
+}
+
+nnvm.core.Node *-- dmlc.any
+
+
+@enduml
