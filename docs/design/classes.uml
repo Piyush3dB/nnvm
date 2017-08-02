@@ -1,5 +1,8 @@
 @startuml
-left to right direction
+'left to right direction
+
+'!define NNVM_REGISTER_PASS (T,#FFAAAA) Registry
+
 namespace nnvm {
     namespace core {
         class Node {
@@ -8,22 +11,22 @@ namespace nnvm {
         }
         class NodeAttrs {
         }
-        Node *-- NodeAttrs
-        Node *-- NodeEntry
+        Node *--> NodeAttrs : <<has a>>
+        Node *--> NodeEntry : <<has a>>
         
         class Op {
         }
-        Node o-- Op
+        Node o--> Op : <<references>>
 
         class Symbol {
         }
-        Symbol *-- NodeEntry
+        Symbol *--> NodeEntry : <<has a>>
 
         class Graph {
         }
         class IndexedGraph {
         }
-        Graph ..> IndexedGraph :: <<friend>>
+        Graph ..> IndexedGraph : <<friend>>
 
 
 
@@ -31,25 +34,112 @@ namespace nnvm {
         }
         class OpGroup {
         }
-        OpMap ..> Op :: <<friend>>
-        OpGroup ..> Op :: <<friend>>
+        OpMap ..> Op : <<friend>>
+        OpGroup ..> Op : <<friend>>
 
 
 
 
     }
     namespace pass {
+        class PassFunctionReg {
+        }
+
+        class NNVM_REGISTER_PASS << Registry >> {
+        'List Registry {
+            +Gradient
+            +LoadJSON
+            +SaveJSON
+            +OrderMutation
+            +InferShape
+            +InferType
+            +PlanMemory
+            +PlaceDevice
+            +InferShape
+        }
+
     }
     namespace c_api {
+        interface NNSymbol<<free functions>> {
+            .. Base ..
+            +NNSymbolFree()
+            +NNSymbolCompose()
+            +NNSymbolSetAttrs()
+            +NNGetOpInfo()
+            +NNSymbolCreateAtomicSymbol()
+            +NNListAllOpNames()
+            +NNGetOpHandle()
+            .. Extended ..
+            +NNSymbolCopy()
+            +NNSymbolGetOutput()
+            +NNSymbolGetAttr()
+            +NNSymbolListAttrs()
+            +NNSymbolGetInternals()
+            +NNSymbolListInputVariables()
+            +NNSymbolListInputNames()
+            +NNSymbolListOutputNames()
+            +NNSymbolPrint()
+            +NNAddControlDeps()
+            +NNSymbolCreateVariable()
+            +NNSymbolCreateGroup()
+        }
+        interface NNGraph<<free functions>> {
+            .. All ..
+            +NNGraphFree()
+            +NNGraphGetJSONAttr()
+            +NNGraphSetNodeEntryListAttr_()
+            +NNGraphSetJSONAttr()
+            +NNGraphGetSymbol()
+            +NNGraphApplyPasses()
+            +NNGraphCreate()
+        }
     }
+    'nnvm.c_api ..> nnvm.core : <<wraps>>
+    nnvm.c_api.NNGraph ..> nnvm.core.Graph : <<wraps>>
+    nnvm.c_api.NNSymbol ..> nnvm.core.Symbol : <<wraps>>
+
+
+
+    namespace fusion {
+        class RTC { 
+        }
+        class AST {
+        }
+        interface fusion <<free float>> { 
+        }
+        interface codegen <<free float>> { 
+        }
+        class NNVM_REGISTER_PASS_FUSION << Registry >> {
+            +RTCGen
+            +Fusion
+            +CodeGen
+        }
+    }
+
 }
+
+circle API
+
+namespace python_wrapper {
+    class SymbolBase <<C API wrapper>> {
+    }
+    class Symbol <<C API wrapper>> {
+    }
+    class Graph <<C API wrapper>> {
+    }
+
+    SymbolBase <|-- Symbol 
+
+}
+python_wrapper --( API
+nnvm.c_api -- API
+
+
 
 namespace dmlc {
-    class any {
-    }
 }
 
-nnvm.core.Node *-- dmlc.any
+nnvm *--> dmlc : <<implemented-in-terms-of>>
 
 
 @enduml
